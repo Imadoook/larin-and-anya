@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لارين وأنية إنهم قادمون 👮‍♀️✨</title>
+    <!-- Three.js 3D Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #110d21;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 950px;
+            max-height: 650px;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
+            overflow: hidden;
+            border: 4px solid #ff69b4;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* HUD Header Styling (Feminine Theme) */
+        .hud {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hud-box {
+            background: rgba(255, 105, 180, 0.25);
+            backdrop-filter: blur(8px);
+            padding: 8px 18px;
+            border-radius: 25px;
+            border: 2px solid #ffb6c1;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .hud-title {
+            font-size: 18px;
+            color: #fff0f5;
+            border-color: #ff1493;
+            background: rgba(255, 20, 147, 0.4);
+        }
+
+        /* Touch Controls */
+        .controls-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 130px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.8), rgba(255, 20, 147, 0.9));
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.5);
+            transition: transform 0.1s;
+        }
+
+        .control-btn:active {
+            transform: scale(0.9);
+            background: #ff1493;
+        }
+
+        .dpad-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-sprint {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid #fff;
+        }
+
+        /* Overlays (Start & Victory / Fail) */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(30, 10, 40, 0.95), rgba(70, 20, 60, 0.95));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            text-align: center;
+            padding: 25px;
+        }
+
+        .game-logo-box {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .avatar-badges {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .badge-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #ff69b4;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+        }
+
+        .overlay h1 {
+            font-size: 32px;
+            color: #ffb6c1;
+            margin-bottom: 10px;
+            text-shadow: 0 0 12px #ff1493;
+        }
+
+        .overlay p {
+            font-size: 15px;
+            color: #ffe4e1;
+            margin-bottom: 20px;
+            max-width: 80%;
+            line-height: 1.6;
+        }
+
+        .btn-start {
+            padding: 14px 45px;
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 20, 147, 0.6);
+            transition: transform 0.2s;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Canvas Overlay -->
+        <div class="hud">
+            <div class="hud-box hud-title">👮‍♀️ لارين وأنية إنهم قادمون ✨</div>
+            <div class="hud-box">المرحلة: <span id="level-num" style="color:#ffb6c1">1</span></div>
+            <div class="hud-box">الوقت المتبقي: <span id="timer-val" style="color:#feca57">01:00</span></div>
+            <div class="hud-box">المسافة: <span id="dist-val" style="color:#00d2ff">50m</span></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-container">
+            <div class="dpad-container">
+                <div class="control-btn" id="btn-left">◀</div>
+                <div class="control-btn" id="btn-right">▶</div>
+            </div>
+            <div class="control-btn btn-sprint" id="btn-sprint">جري ⚡</div>
+        </div>
+
+        <!-- Start Overlay -->
+        <div id="start-overlay" class="overlay">
+            <div class="game-logo-box">
+                <div class="avatar-badges">
+                    <div class="badge-img" title="لارين الشرطية">👮‍♀️</div>
+                    <div class="badge-img" title="أنية الشرطية الصغرى">👧</div>
+                </div>
+                <h1>لارين وأنية إنهم قادمون 👮‍♀️✨</h1>
+            </div>
+            <p>
+                تخرج البطلتان **لارين** و أختها الصغرى **أنية** بزي الشرطة من مبنى مركز الشرطة ثلاثي الأبعاد!<br>
+                مهمتكم مطاردة الفتاة الخاطفة التي تظهر فوق رأسها **نقطة حمراء تومض** بالخطر.<br>
+                لديكما **دقيقة واحدة (60 ثانية)** للإمساك بها واقتيادها إلى السجن للعبور للمرحلة التالية!
+            </p>
+            <button class="btn-start" id="start-btn">ابدأ المطاردة الآن!</button>
+        </div>
+
+        <!-- End Overlay -->
+        <div id="end-overlay" class="overlay hidden">
+            <h1 id="end-title">تمت المهمة بنجاح! 🎉</h1>
+            <p id="end-msg"></p>
+            <button class="btn-start" id="restart-btn">المرحلة التالية 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // Game UI Elements
+        const container = document.getElementById('game-container');
+        const levelNumEl = document.getElementById('level-num');
+        const timerValEl = document.getElementById('timer-val');
+        const distValEl = document.getElementById('dist-val');
+        const startOverlay = document.getElementById('start-overlay');
+        const endOverlay = document.getElementById('end-overlay');
+        const endTitle = document.getElementById('end-title');
+        const endMsg = document.getElementById('end-msg');
+
+        // State Variables
+        let currentLevel = 1;
+        let timeRemaining = 60;
+        let timerInterval = null;
+        let gameActive = false;
+
+        // Three.js Scene Setup
+        let scene, camera, renderer;
+        let larinMesh, aniaMesh, suspectMesh, sirenLightMesh;
+        let policeStationMesh;
+        let cityRoads = [];
+
+        // Movement Controls
+        const keys = { left: false, right: false, sprint: false };
+        let playerZ = 0;
+        let playerX = 0;
+        let suspectZ = -40;
+        let suspectX = 0;
+        let playerSpeed = 0.35;
+        let suspectSpeed = 0.3;
+
+        function init3DWorld() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a0926);
+            scene.fog = new THREE.FogExp2(0x1a0926, 0.015);
+
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffd1dc, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(20, 40, 20);
+            scene.add(dirLight);
+
+            // Create Police Station
+            createPoliceStation();
+
+            // Create Road & City Buildings
+            createRoadEnvironment();
+
+            // Create Characters
+            createPoliceOfficers();
+            createSuspect();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createPoliceStation() {
+            policeStationMesh = new THREE.Group();
+
+            // Main Building
+            const bldgGeo = new THREE.BoxGeometry(20, 12, 15);
+            const bldgMat = new THREE.MeshPhongMaterial({ color: 0x2b2d42 });
+            const bldg = new THREE.Mesh(bldgGeo, bldgMat);
+            bldg.position.set(0, 6, 10);
+            policeStationMesh.add(bldg);
+
+            // Roof Sign (POLICE)
+            const signGeo = new THREE.BoxGeometry(10, 2.5, 1);
+            const signMat = new THREE.MeshPhongMaterial({ color: 0x0077b6 });
+            const sign = new THREE.Mesh(signGeo, signMat);
+            sign.position.set(0, 12, 2.5);
+            policeStationMesh.add(sign);
+
+            // Gate Entrance
+            const gateGeo = new THREE.BoxGeometry(6, 6, 1);
+            const gateMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+            const gate = new THREE.Mesh(gateGeo, gateMat);
+            gate.position.set(0, 3, 2.5);
+            policeStationMesh.add(gate);
+
+            scene.add(policeStationMesh);
+        }
+
+        function createRoadEnvironment() {
+            // Long Road
+            const roadGeo = new THREE.PlaneGeometry(16, 500);
+            const roadMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
+            const road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.set(0, 0, -200);
+            scene.add(road);
+
+            // Sidewalks
+            const swGeo = new THREE.BoxGeometry(4, 0.4, 500);
+            const swMat = new THREE.MeshPhongMaterial({ color: 0x888888 });
+            
+            const swLeft = new THREE.Mesh(swGeo, swMat);
+            swLeft.position.set(-10, 0.2, -200);
+            scene.add(swLeft);
+
+            const swRight = new THREE.Mesh(swGeo, swMat);
+            swRight.position.set(10, 0.2, -200);
+            scene.add(swRight);
+
+            // Decorative Buildings on sides
+            for (let z = -20; z > -450; z -= 30) {
+                const bMat = new THREE.MeshPhongMaterial({ color: Math.random() > 0.5 ? 0x4a4e69 : 0x6b705c });
+                const bLeft = new THREE.Mesh(new THREE.BoxGeometry(12, 15 + Math.random() * 10, 20), bMat);
+                bLeft.position.set(-20, 8, z);
+                scene.add(bLeft);
+
+                const bRight = new THREE.Mesh(new THREE.BoxGeometry(12, 15 + Math.random() * 10, 20), bMat);
+                bRight.position.set(20, 8, z);
+                scene.add(bRight);
+            }
+        }
+
+        function createPoliceOfficers() {
+            // Larin (Big sister officer)
+            larinMesh = new THREE.Group();
+            
+            // Body / Uniform
+            const bodyGeo = new THREE.CylinderGeometry(0.5, 0.6, 1.8);
+            const uniMat = new THREE.MeshPhongMaterial({ color: 0x001845 }); // Police Navy Blue
+            const body = new THREE.Mesh(bodyGeo, uniMat);
+            body.position.y = 0.9;
+            larinMesh.add(body);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.45, 16, 16);
+            const skinMat = new THREE.MeshPhongMaterial({ color: 0xffdbac });
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 2.0;
+            larinMesh.add(head);
+
+            // Police Cap
+            const capGeo = new THREE.CylinderGeometry(0.55, 0.5, 0.25);
+            const capMat = new THREE.MeshPhongMaterial({ color: 0x000b1e });
+            const cap = new THREE.Mesh(capGeo, capMat);
+            cap.position.y = 2.4;
+            larinMesh.add(cap);
+
+            larinMesh.position.set(-1, 0, 0);
+            scene.add(larinMesh);
+
+            // Ania (Little sister officer - smaller)
+            aniaMesh = larinMesh.clone();
+            aniaMesh.scale.set(0.75, 0.75, 0.75);
+            aniaMesh.position.set(1, 0, 0);
+            scene.add(aniaMesh);
+        }
+
+        function createSuspect() {
+            suspectMesh = new THREE.Group();
+
+            // Pink Hoodie Suspect Girl
+            const bodyGeo = new THREE.CylinderGeometry(0.45, 0.55, 1.6);
+            const hoodieMat = new THREE.MeshPhongMaterial({ color: 0xff007f });
+            const body = new THREE.Mesh(bodyGeo, hoodieMat);
+            body.position.y = 0.8;
+            suspectMesh.add(body);
+
+            const headGeo = new THREE.SphereGeometry(0.4, 16, 16);
+            const skinMat = new THREE.MeshPhongMaterial({ color: 0xffdbac });
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 1.8;
+            suspectMesh.add(head);
+
+            // Red Blinking Siren Sphere Above Head
+            const sirenGeo = new THREE.SphereGeometry(0.35, 16, 16);
+            const sirenMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            sirenLightMesh = new THREE.Mesh(sirenGeo, sirenMat);
+            sirenLightMesh.position.y = 2.8;
+            suspectMesh.add(sirenLightMesh);
+
+            suspectMesh.position.set(0, 0, suspectZ);
+            scene.add(suspectMesh);
+        }
+
+        function onWindowResize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // Control Binding
+        function bindControl(elementId, keyName) {
+            const btn = document.getElementById(elementId);
+            const startPress = (e) => { e.preventDefault(); keys[keyName] = true; };
+            const endPress = (e) => { e.preventDefault(); keys[keyName] = false; };
+
+            btn.addEventListener('touchstart', startPress);
+            btn.addEventListener('touchend', endPress);
+            btn.addEventListener('mousedown', startPress);
+            btn.addEventListener('mouseup', endPress);
+            btn.addEventListener('mouseleave', endPress);
+        }
+
+        bindControl('btn-left', 'left');
+        bindControl('btn-right', 'right');
+        bindControl('btn-sprint', 'sprint');
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+            if (e.key === 'Shift' || e.key === ' ') keys.sprint = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+            if (e.key === 'Shift' || e.key === ' ') keys.sprint = false;
+        });
+
+        // Start / Restart Loop
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            if (timeRemaining > 0) currentLevel++;
+            startGame();
+        });
+
+        function startGame() {
+            startOverlay.classList.add('hidden');
+            endOverlay.classList.add('hidden');
+            
+            levelNumEl.textContent = currentLevel;
+            timeRemaining = 60;
+            playerZ = 0;
+            playerX = 0;
+            suspectZ = -35;
+            suspectX = 0;
+            
+            // Increase Difficulty per level
+            suspectSpeed = 0.32 + (currentLevel * 0.04);
+            playerSpeed = 0.38;
+
+            gameActive = true;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!gameActive) return;
+                timeRemaining--;
+                timerValEl.textContent = `00:${timeRemaining < 10 ? '0' : ''}${timeRemaining}`;
+
+                if (timeRemaining <= 0) {
+                    gameOver(false, 'هربت الفتاة الخطيرة! حاولوا مرة أخرى يا بطلات!');
+                }
+            }, 1000);
+        }
+
+        // Animation / Update Loop
+        let clock = new THREE.Clock();
+
+        function update() {
+            if (!gameActive) return;
+
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+
+            // Red Siren Blinker Animation
+            if (sirenLightMesh) {
+                sirenLightMesh.material.color.setHex(Math.sin(time * 15) > 0 ? 0xff0000 : 0x330000);
+            }
+
+            // Player Lateral Movement
+            if (keys.left && playerX > -6) playerX -= 0.15;
+            if (keys.right && playerX < 6) playerX += 0.15;
+
+            // Forward Sprint Movement
+            let currentSpeed = keys.sprint ? playerSpeed * 1.4 : playerSpeed;
+            playerZ -= currentSpeed;
+
+            // Suspect Running Away
+            suspectZ -= suspectSpeed;
+            // Suspect slight zigzag wandering
+            suspectX = Math.sin(time * 2) * 3;
+
+            // Update Positions
+            larinMesh.position.set(playerX - 0.8, 0, playerZ);
+            aniaMesh.position.set(playerX + 0.8, 0, playerZ);
+            suspectMesh.position.set(suspectX, 0, suspectZ);
+
+            // Running Animations (Slight Tilt)
+            larinMesh.rotation.z = Math.sin(time * 10) * 0.05;
+            aniaMesh.rotation.z = -Math.sin(time * 10) * 0.05;
+
+            // Camera Following Player
+            camera.position.set(playerX, 5, playerZ + 12);
+            camera.lookAt(playerX, 2, playerZ - 10);
+
+            // Calculate Distance
+            let distance = Math.abs(playerZ - suspectZ);
+            distValEl.textContent = `${Math.round(distance)}m`;
+
+            // Check Catch Condition
+            if (distance < 2.0 && Math.abs(playerX - suspectX) < 2.5) {
+                gameOver(true, `أحسنتما يا لارين وأنية! تم الإمساك بالفتاة الخطيرة وإرسالها للسجن في المرحلة ${currentLevel}!`);
+            }
+        }
+
+        function render() {
+            requestAnimationFrame(render);
+            if (gameActive) update();
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        function gameOver(isWin, msg) {
+            gameActive = false;
+            clearInterval(timerInterval);
+            endOverlay.classList.remove('hidden');
+            endMsg.textContent = msg;
+
+            if (isWin) {
+                endTitle.textContent = '🏆 إنجاز أسطوري! تم القبض عليها!';
+                endTitle.style.color = '#ff69b4';
+            } else {
+                endTitle.textContent = '❌ انتهى الوقت!';
+                endTitle.style.color = '#ff4d4d';
+            }
+        }
+
+        // Initialize Scene
+        init3DWorld();
+        render();
+    </script>
+</body>
+</html>
